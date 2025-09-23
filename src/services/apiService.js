@@ -19,7 +19,12 @@ export const registerChild = async (parentId, childData) => {
   try {
     // Your backend expects POST /child/create, and child JSON includes parent with parentId
     const childPayload = {
-      ...childData,
+      identityNumber: childData.identityNumber,
+      name: childData.name,
+      surname: childData.surname,
+      age: parseInt(childData.age), // Convert to number if needed
+      dateOfBirth: childData.dateOfBirth,
+      gender: childData.gender,
       parent: { userId: parentId },  // Adjust "userId" if your Parent entity's ID field has a different name
     };
 
@@ -92,6 +97,17 @@ export const updateUserPassword = async (userId, newPassword, role) => {
     return response.data;
   } catch (error) {
     console.error('Update password error:', error.response || error.message);
+    throw error;
+  }
+};
+
+// getchild name
+export const getChildrenByParent = async (parentId) => {
+  try {
+    const response = await axios.get(`${API_URL}/child/byParent/${parentId}`);
+    return response.data; // array of children
+  } catch (error) {
+    console.error("Error fetching children:", error.response || error.message);
     throw error;
   }
 };

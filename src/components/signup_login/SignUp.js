@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import SharedPage from './SharedPage';
 import './SignupLogin.css';
-import { registerParent, registerChild,registerDoctor } from '../../services/apiService';
+import { registerParent, registerChild, registerDoctor } from '../../services/apiService';
 
 const SignUp = ({ userType }) => {
   const [step, setStep] = useState(1); // Step 1 = parent form, Step 2 = child form
   const [parentId, setParentId] = useState(null);
-  
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -31,7 +29,7 @@ const SignUp = ({ userType }) => {
     childSurname: '',
     childAge: '',
     childDOB: '',
-    childGender: ''
+    gender: ''
   });
 
   const [loading, setLoading] = useState(false);
@@ -54,41 +52,26 @@ const SignUp = ({ userType }) => {
     setErrorMessage('');
     setSuccessMessage('');
 
- try {
-    let savedUser;
+    try {
+      let savedUser;
+      if (userType === 'doctor') {
+        savedUser = await registerDoctor(formData);
+      } else {
+        savedUser = await registerParent(formData);
+      }
 
-    if (userType === 'doctor') {
-      savedUser = await registerDoctor(formData);  // <-- call doctor API
-    } else {
-      savedUser = await registerParent(formData);  // <-- call parent API
+      console.log('Saved user:', savedUser);
+      setParentId(savedUser.userId); // adjust based on backend
+      if (userType !== 'doctor') setStep(2);
+      else navigate('/login/doctor');
+
+    } catch (error) {
+      console.error('Registration error:', error.response?.data || error.message);
+      setErrorMessage(`Failed to register ${userType}. Please try again.`);
+    } finally {
+      setLoading(false);
     }
-
-    console.log('Saved user:', savedUser);
-    setParentId(savedUser.userId);  // or savedUser.id depending on your backend
-     if (userType !== 'doctor') setStep(2);
-     else navigate('/login/doctor');
-
-  } catch (error) {
-    console.error('Registration error:', error.response?.data || error.message);
-    setErrorMessage(`Failed to register ${userType}. Please try again.`);
-  } finally {
-    setLoading(false);
-  }
-};
-/*  try {
-    const savedParent = await registerParent(formData);
-    console.log('Saved parent:', savedParent);  // <-- log the successful response
-setParentId(savedParent.userId);
-    setStep(2);
-  } catch (error) {
-    console.error('Parent registration error:', error.response?.data || error.message);
-    setErrorMessage('Failed to register parent. Please try again.');
-  } finally {
-    setLoading(false);
-  }
-  };*/
-
-
+  };
 
   const handleChildSubmit = async (e) => {
     e.preventDefault();
@@ -96,24 +79,53 @@ setParentId(savedParent.userId);
     setErrorMessage('');
     setSuccessMessage('');
 
+    // Validate age <= 10
+    if (parseInt(childData.childAge) > 10) {
+      setErrorMessage('Child must be 10 years old or younger.');
+      setLoading(false);
+      return;
+    }
+
+    // Validate ID matches DOB (assuming South African ID: YYMMDD...)
+    const id = childData.childIdentityNumber;
+    const dob = new Date(childData.childDOB);
+    const idYear = id.substring(0, 2);
+    const idMonth = id.substring(2, 4);
+    const idDay = id.substring(4, 6);
+    const dobYear = dob.getFullYear().toString().substring(2);
+    const dobMonth = (dob.getMonth() + 1).toString().padStart(2, '0');
+    const dobDay = dob.getDate().toString().padStart(2, '0');
+
+    if (idYear !== dobYear || idMonth !== dobMonth || idDay !== dobDay) {
+      setErrorMessage('Identity number does not match the date of birth.');
+      setLoading(false);
+      return;
+    }
+
     try {
-      await registerChild(parentId, childData);
+      await registerChild(parentId, {
+        identityNumber: childData.childIdentityNumber,
+        name: childData.childName,
+        surname: childData.childSurname,
+        age: parseInt(childData.childAge),
+        dateOfBirth: childData.childDOB,
+        gender: childData.gender
+      });
+
       setSuccessMessage('Parent and child registered successfully!');
       setChildData({
-          identityNumber: '',
-         name: '',
-        surname: '',
-        age: '',
-         dateOfBirth: '',
-        childGender: ''
+        childIdentityNumber: '',
+        childName: '',
+        childSurname: '',
+        childAge: '',
+        childDOB: '',
+        gender: ''
       });
 
       navigate(`/login/${userType === 'doctor' ? 'doctor' : 'patient'}`);
-
     } catch (error) {
       setErrorMessage('Failed to register child. Please try again.');
-      console.log('Submitting doctor data:', formData);
-
+      console.log('Submitting child data error:', error);
     } finally {
       setLoading(false);
     }
@@ -141,9 +153,8 @@ setParentId(savedParent.userId);
           </div>
           <div className="form-group">
             <label htmlFor="role">Role</label>
-            <input type="tel" id="role" name="role"   value={userType.toUpperCase()}  readOnly />
+            <input type="text" id="role" name="role" value={userType.toUpperCase()} readOnly />
           </div>
-
           <div className="form-group">
             <label htmlFor="username">Username</label>
             <input type="text" id="username" name="username" value={formData.username} onChange={handleChange} required />
@@ -155,16 +166,14 @@ setParentId(savedParent.userId);
 
           {userType === 'doctor' && (
             <>
-            <div className="form-group">
+              <div className="form-group">
                 <label htmlFor="licenseNumber">License Number</label>
                 <input type="text" id="licenseNumber" name="licenseNumber" value={formData.licenseNumber} onChange={handleChange} required />
               </div>
-
               <div className="form-group">
                 <label htmlFor="specialization">Specialization</label>
                 <input type="text" id="specialization" name="specialization" value={formData.specialization} onChange={handleChange} required />
               </div>
-              
             </>
           )}
 
@@ -187,28 +196,28 @@ setParentId(savedParent.userId);
         <form onSubmit={handleChildSubmit} className="signup-form">
           <h3>Register Child</h3>
           <div className="form-group">
-            <label htmlFor="identityNumber">Identity Number</label>
-            <input type="text" id="identityNumber" name="identityNumber" value={childData.identityNumber} onChange={handleChildChange} required />
+            <label htmlFor="childIdentityNumber">Identity Number</label>
+            <input type="text" id="childIdentityNumber" name="childIdentityNumber" value={childData.childIdentityNumber} onChange={handleChildChange} required />
           </div>
           <div className="form-group">
-            <label htmlFor="name">Name</label>
-            <input type="text" id="name" name="name" value={childData.name} onChange={handleChildChange} required />
+            <label htmlFor="childName">Name</label>
+            <input type="text" id="childName" name="childName" value={childData.childName} onChange={handleChildChange} required />
           </div>
           <div className="form-group">
-            <label htmlFor="surname">Surname</label>
-            <input type="text" id="surname" name="surname" value={childData.surname} onChange={handleChildChange} required />
+            <label htmlFor="childSurname">Surname</label>
+            <input type="text" id="childSurname" name="childSurname" value={childData.childSurname} onChange={handleChildChange} required />
           </div>
           <div className="form-group">
-            <label htmlFor="age">Age</label>
-            <input type="number" id="age" name="age" value={childData.age} onChange={handleChildChange} required />
+            <label htmlFor="childAge">Age</label>
+            <input type="number" id="childAge" name="childAge" value={childData.childAge} onChange={handleChildChange} required />
           </div>
           <div className="form-group">
-            <label htmlFor="dateOfBirth">Date of Birth</label>
-            <input type="date" id="dateOfBirth" name="dateOfBirth" value={childData.dateOfBirth} onChange={handleChildChange} required />
+            <label htmlFor="childDOB">Date of Birth</label>
+            <input type="date" id="childDOB" name="childDOB" value={childData.childDOB} onChange={handleChildChange} required />
           </div>
           <div className="form-group">
-            <label htmlFor="childGender">Gender</label>
-            <select id="childGender" name="childGender" value={childData.childGender} onChange={handleChildChange} required>
+            <label htmlFor="gender">Gender</label>
+            <select id="gender" name="gender" value={childData.gender} onChange={handleChildChange} required>
               <option value="">Select</option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>

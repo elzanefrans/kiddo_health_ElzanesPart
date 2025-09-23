@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import SharedPage from './SharedPage'; 
 import './SignupLogin.css';
-import { loginUser } from '../../services/apiService';
+import { loginUser, getChildrenByParent} from '../../services/apiService';
+import { useUser } from "../../context/UserContext";
+
 
 
 const Login = () => {
@@ -12,36 +14,31 @@ const Login = () => {
     const [termsConditions, setTermsConditions] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
     const [userType, setUserType] = useState('patient');
+      const { setUser, setChild } = useUser(); // get context setters
     const navigate = useNavigate();
 
 
-    // ✅ Updated handleSubmit to actually call backend
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       const userData = await loginUser(email, password, userType);
 
-      // Example: store auth data if needed
-      localStorage.setItem('token', userData.token);
-      localStorage.setItem('user', JSON.stringify(userData));
+      let firstChild = null;
+      if (userData.role === 'PATIENT') {
+        const children = await getChildrenByParent(userData.userId);
+        firstChild = children.length > 0 ? children[0] : null;
+      }
+       // ✅ Update context
+      setUser(userData);
+      setChild(firstChild);
 
-      // ✅ Logic after login
-      //if (userType === 'patient') {
-       // if (userData.children && userData.children.length > 0) {
-       //  navigate('/dashboard/patient');
-     /*    } else {
-          navigate(`/signup/${userType}`); // Or a register-child page
-        }
-      } else if (userType === 'doctor') {
-        navigate('/dashboard/doctor');
-      //}*/
-   if (userData.role === 'PATIENT') {
-    navigate('/dashboard/patient');
-} else if (userData.role === 'DOCTOR') {
-    navigate('/dashboard/doctor');
-}
-
+      // Navigate with state containing user and child
+      if (userData.role === 'PATIENT') {
+        navigate('/dashboard/patient', { state: { user: userData, child: firstChild } });
+      } else if (userData.role === 'DOCTOR') {
+        navigate('/dashboard/doctor', { state: { user: userData } });
+      }
 
     } catch (error) {
       console.error(error);
