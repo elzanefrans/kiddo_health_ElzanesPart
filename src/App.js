@@ -8,7 +8,8 @@ import DoctorDashboard from './components/doctorPages/DoctorDashboard';
 import HealthTips from './components/paitientsPages/HealthTips';
 import Login from './components/signup_login/Login';  
 import SignUp from './components/signup_login/SignUp';
-import ForgotPassword from './components/signup_login/ForgotPassword'    
+import ForgotPassword from './components/signup_login/ForgotPassword'
+
 
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
           <Route path="/signup/patient" element={<SignUp userType="patient" />} />
           <Route path="/signup/doctor" element={<SignUp userType="doctor" />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+
 
         
              {/* Dashboard routes */}

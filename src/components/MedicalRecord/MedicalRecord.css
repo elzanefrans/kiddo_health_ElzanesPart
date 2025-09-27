@@ -1,0 +1,65 @@
+.medical-record-container {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 25px;
+    background-color: #f0f9ff; /* Very light sky blue */
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+    border: 1px solid #cce6ff;
+}
+
+.medical-record-container h2 {
+    color: #1e88e5; /* Friendly blue */
+    margin-top: 0;
+    font-size: 1.7rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.medical-record-container label {
+    display: block;
+    margin: 14px 0 6px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.medical-record-container input,
+.medical-record-container textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #a3d4ff;
+    border-radius: 10px;
+    font-size: 1rem;
+    background-color: white;
+}
+
+.medical-record-container input:focus,
+.medical-record-container textarea:focus {
+    outline: none;
+    border-color: #1e88e5;
+    box-shadow: 0 0 0 3px rgba(30, 136, 229, 0.2);
+}
+
+.medical-record-container textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.medical-record-container button {
+    background-color: #1e88e5;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-top: 16px;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.medical-record-container button:hover {
+    background-color: #1976d2;
+}

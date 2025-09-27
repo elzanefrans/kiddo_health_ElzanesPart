@@ -1,0 +1,58 @@
+.vaccination-container {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 25px;
+    background-color: #fff7f8; /* Warm blush */
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+    border: 1px solid #ffccd2;
+}
+
+.vaccination-container h2 {
+    color: #e91e63; /* Gentle pink-red */
+    margin-top: 0;
+    font-size: 1.7rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.vaccination-container label {
+    display: block;
+    margin: 14px 0 6px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.vaccination-container input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ffb6c1;
+    border-radius: 10px;
+    font-size: 1rem;
+    background-color: white;
+}
+
+.vaccination-container input:focus {
+    outline: none;
+    border-color: #e91e63;
+    box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.2);
+}
+
+.vaccination-container button {
+    background-color: #e91e63;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-top: 16px;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.vaccination-container button:hover {
+    background-color: #c2185b;
+}
