@@ -104,7 +104,7 @@ export const updateUserPassword = async (userId, newPassword, role) => {
 // getchild name
 export const getChildrenByParent = async (parentId) => {
   try {
-    const response = await axios.get(`${API_URL}/child/byParent/${parentId}`);
+    const response = await axios.get(`${API_URL}/child/by-parent/${parentId}`);
     return response.data; // array of children
   } catch (error) {
     console.error("Error fetching children:", error.response || error.message);
